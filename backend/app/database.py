@@ -8,7 +8,15 @@ DATABASE_URL = os.getenv(
     "postgresql://notes_user:notes_pass@localhost:5432/notes_db"
 )
 
-engine = create_engine(DATABASE_URL)
+# Fix para postgres:// vs postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+connect_args = {}
+if "sslmode=require" in DATABASE_URL:
+    connect_args = {"sslmode": "require"}
+
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
